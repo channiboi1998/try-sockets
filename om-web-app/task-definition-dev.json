@@ -1,0 +1,44 @@
+{
+  "family": "voyager-om-web-app-dev",
+  "containerDefinitions": [
+    {
+      "name": "om-web-app",
+      "image": "706096107052.dkr.ecr.ap-southeast-1.amazonaws.com/voyager/om-web-app:latest",
+      "ulimits": [
+        {
+          "name": "nofile",
+          "softLimit": 524288,
+          "hardLimit": 524288
+        }
+      ],
+      "environment": [
+        {
+          "name": "NGINX_ENV",
+          "value": "dev"
+        }
+      ],
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/voyager-om-web-app-dev",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "essential": true
+    }
+  ],
+  "taskRoleArn": "arn:aws:iam::706096107052:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::706096107052:role/ecsTaskExecutionRole",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "512",
+  "memory": "1024"
+}

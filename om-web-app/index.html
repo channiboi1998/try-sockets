@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <script type="text/javascript" src="/env.js" type="module"></script>
+    <script>
+      window.global = window;
+    </script>
+    <!-- Deep freeze window.environment to prevent alterations. -->
+    <script>
+      function deepFreeze(o) {
+        Object.freeze(o);
+        if (o === undefined) {
+          return o;
+        }
+        Object.getOwnPropertyNames(o).forEach(function (prop) {
+          if (
+            o[prop] !== null &&
+            (typeof o[prop] === "object" || typeof o[prop] === "function") &&
+            !Object.isFrozen(o[prop])
+          ) {
+            deepFreeze(o[prop]);
+          }
+        });
+        return o;
+      }
+
+      Object.defineProperty(window, "environment", {
+        value: deepFreeze(environment),
+        writable: false,
+      });
+    </script>
+    <title>Sockets - VOM</title>
+  </head>
+  <body>
+    <section id="root"></section>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>

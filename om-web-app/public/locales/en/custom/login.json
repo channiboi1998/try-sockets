@@ -1,0 +1,16 @@
+{
+  "field": {
+    "email": {
+      "label": "Email",
+      "placeholder": "Email"
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "Enter Password"
+    }
+  },
+  "validation": {
+    "invalidCredentials": "Email or password is invalid"
+  },
+  "submitBtn": "Log In"
+}

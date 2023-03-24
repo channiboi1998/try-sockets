@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    font-family: Source Sans Pro, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  blockquote,
+  dl,
+  dd,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  hr,
+  figure,
+  p,
+  pre {
+    color: #333333;
+  }
+
+  p,
+  ul,
+  ol {
+    font-size: 14px;
+    line-height: 21px;
+  }
+
+  a {
+    color: #458d41;
+  }
+
+  * {
+    outline-color: #00ac24;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  .border-separator {
+    border-top: 1px solid #d7d7d7;
+  }
+
+  .border-separator.half {
+    border-top: 0.5px solid #f2f2f2;
+  }
+
+  .dash-border-separator {
+    border-top: 0.5px dashed #bdbdbd;
+  }
+
+  .scroll::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px transparent;
+    background-color: transparent;
+  }
+
+  .scroll::-webkit-scrollbar {
+    width: 5px;
+    background-color: transparent;
+  }
+
+  .scroll::-webkit-scrollbar-thumb {
+    background-color: #e2e2e2;
+    border: 2px solid #e2e2e2;
+    border-radius: 60px;
+  }
+
+  .collapse-button svg,
+  .nav-item svg {
+    margin: auto;
+  }
+}

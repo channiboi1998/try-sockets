@@ -1,0 +1,16 @@
+[core]
+	ignorecase = false
+[color]
+	status = auto
+	diff = auto
+[pull]
+	rebase = true
+[push]
+	default = current
+	followTags = true
+[branch]
+	autosetuprebase = always
+[merge]
+	ff = only
+	commit = no
+

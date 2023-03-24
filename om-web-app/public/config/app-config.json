@@ -1,0 +1,28 @@
+{
+  "sidebarMenuItems": [
+    {
+      "id": 1,
+      "label": "orders",
+      "iconKey": "list",
+      "url": "/dashboard"
+    },
+    {
+      "id": 2,
+      "label": "stores",
+      "iconKey": "store",
+      "url": "/store"
+    },
+    {
+      "id": 3,
+      "label": "productEditor",
+      "iconKey": "pizza",
+      "url": "/products-editor"
+    },
+    {
+      "id": 4,
+      "label": "sales",
+      "iconKey": "sales",
+      "url": "/sales"
+    }
+  ]
+}

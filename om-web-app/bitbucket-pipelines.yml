@@ -1,0 +1,169 @@
+# web-app pipeline
+
+image:
+  name: 706096107052.dkr.ecr.ap-southeast-1.amazonaws.com/pipeline/node-awscli:16.17.1
+  aws:
+    access-key: $AWS_ACCESS_KEY_ID
+    secret-key: $AWS_SECRET_ACCESS_KEY
+
+options:
+  max-time: 10
+
+definitions:
+  steps:
+    - step: &run-unit-tests
+        name: Run unit tests
+        caches:
+          - node
+        artifacts:
+          download: false
+        script:
+          - make ci-test
+    - step: &build-artifacts
+        name: Build artifacts
+        caches:
+          - node
+        script:
+          - make ci-compile
+        artifacts:
+          - build/**
+    - step: &build-docker-image
+        name: Build docker image
+        trigger: manual
+        caches:
+          - docker
+        services:
+          - docker
+        script:
+          - export DOCKER_BUILDKIT=1
+          - make ci-build && make ci-push
+    - step: &deploy-to-dev
+        name: Deploy to DEV
+        trigger: manual
+        deployment: DEV
+        artifacts:
+          download: false
+        script:
+          - echo "Deploying to DEV environment"
+          - pipe: atlassian/aws-ecs-deploy:1.0.0
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+              CLUSTER_NAME: 'voyager-dev'
+              SERVICE_NAME: 'om-web-app'
+              TASK_DEFINITION: 'task-definition-dev.json'
+              FORCE_NEW_DEPLOYMENT: 'true'
+    - step: &deploy-to-sit
+        name: Deploy to SIT
+        trigger: manual
+        deployment: SIT
+        artifacts:
+          download: false
+        script:
+          - echo "Deploying to SIT environment"
+          - pipe: atlassian/aws-ecs-deploy:1.0.0
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+              CLUSTER_NAME: 'voyager-sit'
+              SERVICE_NAME: 'om-web-app'
+              TASK_DEFINITION: 'task-definition-sit.json'
+              FORCE_NEW_DEPLOYMENT: 'true'
+    - step: &deploy-to-uat
+        name: Deploy to UAT
+        trigger: manual
+        deployment: UAT
+        artifacts:
+          download: false
+        script:
+          - echo "Deploying to UAT environment"
+          - pipe: atlassian/aws-ecs-deploy:1.0.0
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+              CLUSTER_NAME: 'voyager-uat'
+              SERVICE_NAME: 'om-web-app'
+              TASK_DEFINITION: 'task-definition-uat.json'
+              FORCE_NEW_DEPLOYMENT: 'true'
+    - step: &deploy-to-stg
+        name: Deploy to STG
+        trigger: manual
+        deployment: STG
+        clone:
+          enabled: false
+        artifacts:
+          download: false
+        script:
+          - echo "Deploying to STG environment"
+    - step: &deploy-to-prd
+        name: Deploy to PRD
+        trigger: manual
+        deployment: PRD
+        clone:
+          enabled: false
+        artifacts:
+          download: false
+        script:
+          - echo "Deploying to PRD environment"
+
+pipelines:
+  default:
+    - step: *run-unit-tests
+    - step: *build-artifacts
+  pull-requests:
+    '**':
+      - step: *run-unit-tests
+      - step: *build-artifacts
+  branches:
+    '{poc/*}':
+      - step:
+          name: POC pipeline
+          clone:
+            enabled: false
+          script:
+            - echo "POC pipeline execution."
+      - step:
+          <<: *build-artifacts
+          trigger: manual
+      - parallel:
+          - step:
+              <<: *run-unit-tests
+              trigger: manual
+          - step: *build-docker-image
+          - step: *deploy-to-dev
+    '{feature/*,chore/*}':
+      - step: *run-unit-tests
+      - step: *build-artifacts
+      - step: *build-docker-image
+      - step: *deploy-to-dev
+    '{release/*}':
+      - step: *run-unit-tests
+      - step: *build-artifacts
+      - step: *build-docker-image
+      - parallel:
+          - step: *deploy-to-dev
+          - step: *deploy-to-sit
+          - step: *deploy-to-uat
+    '{master}':
+      - step: *run-unit-tests
+      - step: *build-artifacts
+      - step: *build-docker-image
+      - parallel:
+          - step: *deploy-to-dev
+          - step: *deploy-to-sit
+          - step: *deploy-to-uat
+      - parallel:
+          - step: *deploy-to-stg
+          - step: *deploy-to-prd
+  tags:
+    'release-*':
+      - parallel:
+          - step: *deploy-to-dev
+          - step: *deploy-to-sit
+          - step: *deploy-to-uat
+      - parallel:
+          - step: *deploy-to-stg
+          - step: *deploy-to-prd
